@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import styles from './App.module.css';
 import './global.css';
-import { Sidebar } from './components/Sidebarr/Sidebar';
+import { Sidebar } from './components/Sidebar/Sidebar';
 import { Header } from './components/Header/Header';
 import { Post } from './components/Post/Post';
 
