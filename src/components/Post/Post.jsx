@@ -1,25 +1,54 @@
+import { format, formatDistanceToNow } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { useState } from 'react';
 import { Avatar } from '../Avatar/Avatar';
 import { Comments } from '../Comments/Comments';
 import styles from './Post.module.css';
 
-export function Post () {
+export function Post ({ author, content, publishedAt }) {
+  const [comments, setComments] = useState([
+    'Post muito bacana, hein?!',
+  ])
+
+  const [newCommentText, setNewCommentText] = useState('');
+
+  const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'", { locale: ptBR });
+
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, { locale: ptBR, addSuffix: true });
+
+  function handleNewCommentChange() {
+    setNewCommentText(event.target.value);
+  }
+
+  function handleCreateNewComment() {
+    event.preventDefault();
+
+    setComments([...comments, newCommentText]);
+    
+    setNewCommentText('');
+  }
+
   return (
     <article className={styles.post}>
       <header className={styles.header}>
         <div className={styles.author}>
-          <Avatar src="https://avatars.githubusercontent.com/u/75635566?v=4" />
+          <Avatar src={author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>Fernando Lisboa</strong>
-            <span> React Student</span>
+            <strong>{author.name}</strong>
+            <span> {author.role}</span>
           </div>
         </div>
-        <time title='04 de junho de 2022 às 08:00' dateTime='2022-06-04 08:00:00' >Publicado há 1h</time>
+        <time title={publishedDateFormatted} dateTime={publishedAt.toISOString()} >{publishedDateRelativeToNow}</time>
       </header>
 
       <div className={styles.content}>
-        <p>Fala galeraa 👋</p>
-        <p>Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀</p>
-        <p>👉{''}<a href="#">jane.design/doctorcare</a></p>
+        {content.map((item) => {
+          if (item.type === 'paragraph') {
+            return <p>{item.content}</p>
+          } else if (item.type === 'link') {
+            return <p><a href='#'>{item.content}</a></p>
+          }
+        })}
         <p>
           <a href="#">#novoprojeto</a> {''}
           <a href="#">#nlw</a> {''}
@@ -27,10 +56,13 @@ export function Post () {
         </p>
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong>Deixe seu feedback</strong>
         <textarea 
-          placeholder='Deixe um comentário' 
+          name='comment'
+          placeholder='Deixe um comentário'
+          onChange={handleNewCommentChange}
+          value={newCommentText}
         />
         <footer>
           <button type='submit'>Publicar</button>
@@ -39,9 +71,9 @@ export function Post () {
 
 
       <div className={styles.commentList}>
-        <Comments />
-        <Comments />
-        <Comments />
+        {comments.map(comment => {
+          return <Comments content={comment} />
+        })}
       </div>
 
     </article>
