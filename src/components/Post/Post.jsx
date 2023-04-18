@@ -17,6 +17,7 @@ export function Post ({ author, content, publishedAt }) {
   const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, { locale: ptBR, addSuffix: true });
 
   function handleNewCommentChange() {
+    event.target.setCustomValidity('');
     setNewCommentText(event.target.value);
   }
 
@@ -27,6 +28,19 @@ export function Post ({ author, content, publishedAt }) {
     
     setNewCommentText('');
   }
+
+  function deleteComment(commentToDelete) {
+    const commentsWithoutDeletedOne = comments.filter(comment => {
+      return comment !== commentToDelete;
+    })
+    setComments(commentsWithoutDeletedOne);
+  }
+
+  function handleNewCommentInvalid() {
+    event.target.setCustomValidity('Esse campo é obrigatório!');
+  }
+
+  const inNewCommentEmpty = newCommentText.length === 0;
 
   return (
     <article className={styles.post}>
@@ -44,9 +58,9 @@ export function Post ({ author, content, publishedAt }) {
       <div className={styles.content}>
         {content.map((item) => {
           if (item.type === 'paragraph') {
-            return <p>{item.content}</p>
+            return <p key={item.content}>{item.content}</p>
           } else if (item.type === 'link') {
-            return <p><a href='#'>{item.content}</a></p>
+            return <p key={item.content}><a href='#'>{item.content}</a></p>
           }
         })}
         <p>
@@ -63,16 +77,18 @@ export function Post ({ author, content, publishedAt }) {
           placeholder='Deixe um comentário'
           onChange={handleNewCommentChange}
           value={newCommentText}
+          onInvalid={handleNewCommentInvalid}
+          required
         />
         <footer>
-          <button type='submit'>Publicar</button>
+          <button type='submit' disabled={inNewCommentEmpty}>Publicar</button>
         </footer>
       </form>
 
 
       <div className={styles.commentList}>
         {comments.map(comment => {
-          return <Comments content={comment} />
+          return <Comments key={comment} content={comment} onDeleteComment={deleteComment}/>
         })}
       </div>
 
